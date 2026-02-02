@@ -46,5 +46,5 @@ tzlocal==5.3.1
 urllib3==2.6.1
 vine==5.1.0
 wcwidth==0.2.14
-psycopg2-binary==2.9.9
+psycopg[binary]
 django-cors-headers==4.3.1

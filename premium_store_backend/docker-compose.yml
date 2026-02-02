@@ -10,16 +10,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "resume_db", "-U", "postgres"]
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
       interval: 30s
       timeout: 60s
       retries: 5
       start_period: 80s
+    networks:
+      - premium_store_net
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - premium_store_net
 
   backend:
     build: .
@@ -27,24 +36,45 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     volumes:
       - ./media:/app/media
+    networks:
+      - premium_store_net
 
   celery:
     build: .
     command: celery -A config worker --loglevel=info
     depends_on:
-      - db
-      - redis
-      - backend
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
     env_file:
       - .env
+    networks:
+      - premium_store_net
+
+  frontend:
+    build:
+      context: ../premium_store_frontend
     ports:
-      - "5673:5673"
+      - "3006:3005"
+    depends_on:
+      - backend
+    networks:
+      - premium_store_net
 
 volumes:
   postgres_data:
+
+networks:
+  premium_store_net:
+    driver: bridge
