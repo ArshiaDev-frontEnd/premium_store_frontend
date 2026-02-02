@@ -1,0 +1,98 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: premium_store_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - premium_store_net
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - premium_store_net
+
+  backend:
+    build:
+      context: ./premium_store_backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./premium_store_backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - POSTGRES_DB=premium_store_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - premium_store_net
+
+  celery:
+    build:
+      context: ./premium_store_backend
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./premium_store_backend:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    environment:
+      - POSTGRES_DB=premium_store_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - premium_store_net
+
+  frontend:
+    build:
+      context: ./premium_store_frontend
+    ports:
+      - "3006:3005"
+    volumes:
+      - ./premium_store_frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    networks:
+      - premium_store_net
+
+volumes:
+  postgres_data:
+
+networks:
+  premium_store_net:
+    driver: bridge
