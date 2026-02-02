@@ -1,14 +1,13 @@
-# 💎 Premium Store Frontend
+Premium Services Store API
+This is a Django Rest Framework (DRF) based e-commerce API for selling premium subscription services for platforms like Telegram, Spotify, YouTube, and more. Users can browse applications (categories), select services, add them to a cart with custom fields (e.g., username, password), proceed to checkout, and complete payments via Zarinpal gateway. It includes features like user authentication, phone verification via SMS (using Kavenegar), discounts, order management, and admin controls. The project is containerized with Docker for easy deployment and uses Celery for asynchronous tasks like SMS sending.
 
-A high-performance, responsive, and psychology-driven e-commerce storefront built with modern web technologies. This project focuses on delivering a seamless shopping experience with a clean UI and robust state management.
+This repository serves as a strong portfolio piece demonstrating full-stack API development, including secure authentication, payment integration, and scalable architecture.
 
-## 🚀 Key Features
+Developers
+Backend Developer: [Sina Khalafi](https://github.com/SinaCode-dev)
 
-* **Psychology-Driven UX:** Designed with user behavior principles to maximize conversion and engagement.
-* **Responsive Design:** Fully optimized for mobile, tablet, and desktop views.
-* **State Management:** Robust handling of shopping carts and user sessions using modern state containers.
-* **API Integration:** Seamless connection to RESTful backend services for real-time data fetching.
-* **Secure Auth:** Integrated login and registration flows with proper error handling.
+Frontend Developer: [Arshia Karimi Jabali](https://github.com/ArshiaDev-frontEnd)
+
 
 ## 🛠 Tech Stack
 
