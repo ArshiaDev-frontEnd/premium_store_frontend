@@ -79,7 +79,7 @@ services:
     build:
       context: ./premium_store_frontend
     ports:
-      - "3006:3005"
+      - "3006:3000"
     volumes:
       - ./premium_store_frontend:/app
       - /app/node_modules
